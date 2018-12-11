@@ -23,7 +23,13 @@ namespace crq
     {
     public:
 
-        static Response get(::std::string url)
+        static Response get(::std::string url/*, ...*/)
+        {
+            auto res = Response(/*...*/);
+            return res;
+        }
+
+        static Response post(::std::string url/*, ...*/)
         {
             auto res = Response(/*...*/);
             return res;
