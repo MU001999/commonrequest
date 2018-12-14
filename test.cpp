@@ -1,3 +1,5 @@
+#define DEBUG
+
 #include "crq.hpp"
 
 #include <iostream>
@@ -8,7 +10,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    auto res = crq::Request::get("www.baidu.com");
+    auto res = crq::Request::get("www.jusot.com");
 
     cout << res.raw << endl;
 
