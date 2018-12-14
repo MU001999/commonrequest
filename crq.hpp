@@ -12,6 +12,11 @@
 #include <sys/socket.h>
 
 
+#ifdef DEBUG
+#include <iostream>
+#endif // DEBUG
+
+
 namespace crq
 {
 
@@ -48,6 +53,8 @@ namespace crq
             reason      = rhs.reason;
             charset     = rhs.charset;
             text        = rhs.text;
+            
+            return *this;
         }
 
         Response& operator=(Response &&rhs) noexcept
@@ -57,6 +64,8 @@ namespace crq
             ::std::swap(reason,      rhs.reason);
             ::std::swap(charset,     rhs.charset);
             ::std::swap(text,        rhs.text);
+        
+            return *this;
         }
     };
 
@@ -65,21 +74,30 @@ namespace crq
     {
     private:
 
+        static ::std::string gen_host(::std::string url)
+        {
+            auto pos = url.find("/");
+            return pos == url.npos ? url : url.substr(0, pos);
+        }
+
         static ::std::string gen_req(::std::string url)
         {
-
+            auto pos = url.find('/');
+            return pos == url.npos ? "/" : url.substr(pos);
         }
 
         static Response request(const ::std::string url, const ::std::string method)
         {
             ::std::string response_msg;
 
+
             // init server_addr
-            addrinfo hints = {}, *result;
+            addrinfo hints, *result;
             hints.ai_family = AF_INET;
             hints.ai_socktype = SOCK_STREAM;
             hints.ai_protocol = IPPROTO_TCP;
-            getaddrinfo(url.c_str(), "80", &hints, &result);
+            getaddrinfo(gen_host(url).c_str(), "80", &hints, &result);
+
 
             // connect to server
             auto socket_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -91,30 +109,32 @@ namespace crq
                 }
             }
 
-            // send request message to server
-            {
-                ::std::string request_msg = " HTTP/1.1\r\n"
-                    "Connection: keep-alive\r\n"
-                    "Accept-Encoding: gzip, deflate, br\r\n"
-                    "Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2\r\n"
-                    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0\r\n";
-                request_msg = method + gen_req(url) + request_msg;
 
-                send(socket_fd, request_msg.c_str(), request_msg.length(), 0);
-            }
+            // send request message to server
+            ::std::string request_msg = " HTTP/1.1\r\n"
+                "Host: " + gen_host(url) + "\r\n"
+                "Accept-Encoding: gzip, deflate, br\r\n"
+                "Accept-Language: zh-CN,zh,en-US\r\n"
+                "Connection: keep-alive\r\n"
+                "User-Agent: Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)\r\n\r\n";
+            request_msg = method + gen_req(url) + request_msg;
+            
+#ifdef DEBUG
+            std::cout << request_msg << std::endl;
+#endif // DEBUG
+
+            send(socket_fd, request_msg.c_str(), request_msg.length(), 0);
+
 
             // receive response message from server
-            {
-                char tmp[4096] = { 0 };
+            char tmp[65536] = { 0 };
 
-                while (recv(socket_fd, tmp, 4096, 0) > 0)
-                {
-                    response_msg += tmp;
-                }
+            while (recv(socket_fd, tmp, 65536, 0) > 0)
+            {
+                response_msg += tmp;
             }
 
             freeaddrinfo(result);
-
             close(socket_fd);
 
             return Response(response_msg);
