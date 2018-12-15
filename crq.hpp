@@ -33,20 +33,20 @@ namespace crq
         Response(::std::string &data)
         {
             ::std::stringstream ss(data);
-            ss >> reason;
-            ss >> status_code;
-            ss >> reason;
+            ss >> reason; ss >> status_code; ss.get();
+            ::std::getline(ss, reason); reason.pop_back();
 
             auto header_endpos = data.find("\r\n\r\n") + (::std::size_t)4, html_beginpos = data.find("<html>");
             body = html_beginpos == data.npos ? data.substr(header_endpos) : data.substr(html_beginpos);
 
-            ::std::string tmp; ss >> tmp;
-            while (::std::getline(ss, tmp) && tmp.find("\r\n\r\n") == tmp.npos)
+            ::std::string tmp;
+            while (::std::getline(ss, tmp) && tmp != "\r")
             {
+                tmp.pop_back();
                 auto pos = tmp.find(':');
                 if (pos != tmp.npos)
                 {
-                    auto k = tmp.substr(0, pos), v = tmp.substr(pos + (::std::size_t)2, tmp.find("\r\n"));
+                    auto k = tmp.substr(0, pos), v = tmp.substr(pos + (::std::size_t)2);
                     headers[k] += v;
                 }
             }
@@ -100,7 +100,7 @@ namespace crq
             return pos == url.npos ? "/" : url.substr(pos);
         }
 
-        static Response request(const ::std::string url, const ::std::string method)
+        static Response request(const ::std::string &url, const ::std::string method, ::std::unordered_map<::std::string, ::std::string> &headers)
         {
             ::std::string response_msg;
 
@@ -125,12 +125,10 @@ namespace crq
 
 
             // send request message to server
-            ::std::string request_msg = method + gen_req(url) + " HTTP/1.1\r\n"
-                "Host: " + gen_host(url) + "\r\n"
-                "Content-type: text/html\r\n"
-                "Connection: close\r\n"
-                "Accept-Language: zh-CN,zh,en-US\r\n"
-                "User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)\r\n\r\n";
+            ::std::string request_msg = method + gen_req(url) + " HTTP/1.1\r\n";
+            for (auto &kv : headers) request_msg += kv.first + ": " + kv.second + "\r\n";
+            request_msg += "\r\n";
+
             send(socket_fd, request_msg.c_str(), request_msg.length(), 0);
 
 
@@ -151,9 +149,18 @@ namespace crq
 
     public:
 
-        static Response get(::std::string url)
+        static Response get(::std::string url, ::std::unordered_map<::std::string, ::std::string> headers = {})
         {
-            return request(url, "GET ");
+            decltype(headers) hds = {
+                {"Host", gen_host(url)},
+                {"Content-type", "text/html"},
+                {"Connection", "Close"},
+                {"Accept-Language", "zh-CN,zh,en-US"},
+                {"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0"},
+            };
+            for (auto &kv : headers) hds[kv.first] = kv.second;
+
+            return request(url, "GET ", hds);
         }
         
     };
