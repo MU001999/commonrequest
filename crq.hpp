@@ -12,11 +12,6 @@
 #include <sys/socket.h>
 
 
-#ifdef DEBUG
-#include <iostream>
-#endif // DEBUG
-
-
 namespace crq
 {
 
@@ -100,7 +95,7 @@ namespace crq
 
 
             // connect to server
-            auto socket_fd = socket(AF_INET, SOCK_STREAM, 0);
+            auto socket_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
             for (auto addr = result; addr != NULL; addr = addr->ai_next)
             {
                 if (connect(socket_fd, addr->ai_addr, addr->ai_addrlen) == 0)
@@ -113,30 +108,26 @@ namespace crq
             // send request message to server
             ::std::string request_msg = " HTTP/1.1\r\n"
                 "Host: " + gen_host(url) + "\r\n"
+                "Content-type: text/html\r\n"
+                "Connection: close\r\n"
                 "Accept-Language: zh-CN,zh,en-US\r\n"
-                "Connection: keep-alive\r\n"
                 "User-Agent: Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)\r\n\r\n";
             request_msg = method + gen_req(url) + request_msg;
 
             send(socket_fd, request_msg.c_str(), request_msg.length(), 0);
-            
-
-#ifdef DEBUG
-            std::cout << request_msg << std::endl;
-#endif // DEBUG
 
 
             // receive response message from server
             char tmp[4096] = { 0 };
 
-            while (recv(socket_fd, tmp, 4096, 0) == 4096)
+            while (recv(socket_fd, tmp, 4096, 0) > 0)
             {
                 response_msg += tmp;
                 memset(tmp, 0, sizeof(tmp));
             }
 
-            freeaddrinfo(result);
             close(socket_fd);
+            freeaddrinfo(result);
 
             return Response(response_msg);
         }
