@@ -2,8 +2,10 @@
 
 
 #include <string>
+#include <sstream>
 #include <utility>
 #include <algorithm>
+#include <unordered_map>
 
 #include <cstring>
 
@@ -19,22 +21,22 @@ namespace crq
     {
     public:
 
-        ::std::string url;
-
         int           status_code;
         ::std::string reason;
-        
-        ::std::string charset;
-        ::std::string text;
-
-        ::std::string raw;
+        ::std::string body;
 
 
-        Response() {}
+        Response() : status_code(400) {}
 
         Response(::std::string &data)
         {
-            raw = data;
+            ::std::stringstream ss(data);
+            ss >> reason;
+            ss >> status_code;
+            ss >> reason;
+
+            auto pos = data.find("<html>");
+            body = pos == data.npos ? data.substr(data.find("\r\n\r\n") + (::std::size_t)4) : data.substr(pos);
         }
 
         Response(Response &&res) noexcept = default;
@@ -43,25 +45,22 @@ namespace crq
 
         Response& operator=(Response &rhs)
         {
-            url         = rhs.url;
             status_code = rhs.status_code;
             reason      = rhs.reason;
-            charset     = rhs.charset;
-            text        = rhs.text;
+            body        = rhs.body;
             
             return *this;
         }
 
         Response& operator=(Response &&rhs) noexcept
         {
-            ::std::swap(url,         rhs.url);
             ::std::swap(status_code, rhs.status_code);
             ::std::swap(reason,      rhs.reason);
-            ::std::swap(charset,     rhs.charset);
-            ::std::swap(text,        rhs.text);
-        
+            ::std::swap(body,        rhs.body);
+
             return *this;
         }
+    
     };
 
 
@@ -106,14 +105,12 @@ namespace crq
 
 
             // send request message to server
-            ::std::string request_msg = " HTTP/1.1\r\n"
+            ::std::string request_msg = method + gen_req(url) + " HTTP/1.1\r\n"
                 "Host: " + gen_host(url) + "\r\n"
                 "Content-type: text/html\r\n"
                 "Connection: close\r\n"
                 "Accept-Language: zh-CN,zh,en-US\r\n"
                 "User-Agent: Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)\r\n\r\n";
-            request_msg = method + gen_req(url) + request_msg;
-
             send(socket_fd, request_msg.c_str(), request_msg.length(), 0);
 
 
