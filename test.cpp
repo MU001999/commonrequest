@@ -1,7 +1,4 @@
-#define DEBUG
-
 #include "crq.hpp"
-
 #include <iostream>
 
 
