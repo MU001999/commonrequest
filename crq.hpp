@@ -25,6 +25,8 @@ namespace crq
         ::std::string reason;
         ::std::string body;
 
+        ::std::unordered_map<::std::string, ::std::string> headers;
+
 
         Response() : status_code(400) {}
 
@@ -35,8 +37,19 @@ namespace crq
             ss >> status_code;
             ss >> reason;
 
-            auto pos = data.find("<html>");
-            body = pos == data.npos ? data.substr(data.find("\r\n\r\n") + (::std::size_t)4) : data.substr(pos);
+            auto header_endpos = data.find("\r\n\r\n") + (::std::size_t)4, html_beginpos = data.find("<html>");
+            body = html_beginpos == data.npos ? data.substr(header_endpos) : data.substr(html_beginpos);
+
+            ::std::string tmp; ss >> tmp;
+            while (::std::getline(ss, tmp) && tmp.find("\r\n\r\n") == tmp.npos)
+            {
+                auto pos = tmp.find(':');
+                if (pos != tmp.npos)
+                {
+                    auto k = tmp.substr(0, pos), v = tmp.substr(pos + (::std::size_t)2, tmp.find("\r\n"));
+                    headers[k] += v;
+                }
+            }
         }
 
         Response(Response &&res) noexcept = default;
@@ -48,6 +61,7 @@ namespace crq
             status_code = rhs.status_code;
             reason      = rhs.reason;
             body        = rhs.body;
+            headers      = rhs.headers;
             
             return *this;
         }
@@ -57,10 +71,10 @@ namespace crq
             ::std::swap(status_code, rhs.status_code);
             ::std::swap(reason,      rhs.reason);
             ::std::swap(body,        rhs.body);
+            ::std::swap(headers,      rhs.headers);
 
             return *this;
         }
-    
     };
 
 
@@ -70,13 +84,19 @@ namespace crq
 
         static ::std::string gen_host(::std::string url)
         {
-            auto pos = url.find("/");
+            auto pos = url.find("://");
+            if (pos != url.npos) url = url.substr(pos + (::std::size_t)3);
+
+            pos = url.find("/");
             return pos == url.npos ? url : url.substr(0, pos);
         }
 
         static ::std::string gen_req(::std::string url)
         {
-            auto pos = url.find('/');
+            auto pos = url.find("://");
+            if (pos != url.npos) url = url.substr(pos + (::std::size_t)3);
+
+            pos = url.find('/');
             return pos == url.npos ? "/" : url.substr(pos);
         }
 
@@ -110,7 +130,7 @@ namespace crq
                 "Content-type: text/html\r\n"
                 "Connection: close\r\n"
                 "Accept-Language: zh-CN,zh,en-US\r\n"
-                "User-Agent: Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)\r\n\r\n";
+                "User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)\r\n\r\n";
             send(socket_fd, request_msg.c_str(), request_msg.length(), 0);
 
 
