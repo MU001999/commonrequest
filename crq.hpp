@@ -22,15 +22,14 @@ namespace crq
     public:
 
         int           status_code;
-        ::std::string reason;
-        ::std::string body;
+        ::std::string reason, body;
 
         ::std::unordered_map<::std::string, ::std::string> headers;
 
 
         Response() : status_code(400) {}
 
-        Response(::std::string &data)
+        Response(const ::std::string &data)
         {
             ::std::stringstream ss(data);
             ss >> reason; ss >> status_code; ss.get();
@@ -149,7 +148,7 @@ namespace crq
 
     public:
 
-        static Response get(::std::string url, ::std::unordered_map<::std::string, ::std::string> headers = {})
+        static Response get(const ::std::string &url, ::std::unordered_map<::std::string, ::std::string> headers = {})
         {
             decltype(headers) hds = {
                 {"Host", gen_host(url)},
