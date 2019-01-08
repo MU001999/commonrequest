@@ -21,16 +21,18 @@ namespace crq
     {
     public:
 
-        int           status_code;
+        int           status_code = 400;
         ::std::string reason, body;
 
         ::std::unordered_map<::std::string, ::std::string> headers;
 
 
-        Response() : status_code(400) {}
+        Response() {}
 
-        Response(const ::std::string &data)
+        Response(const ::std::string &data) : status_code(400)
         {
+            if (data.empty()) return;
+            
             ::std::stringstream ss(data);
             ss >> reason; ss >> status_code; ss.get();
             ::std::getline(ss, reason); reason.pop_back();
