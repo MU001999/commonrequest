@@ -29,7 +29,7 @@ namespace crq
 
         Response() {}
 
-        Response(const ::std::string &data) : status_code(400)
+        Response(const ::std::string &data)
         {
             if (data.empty()) return;
             
@@ -47,7 +47,7 @@ namespace crq
                 auto pos = tmp.find(':');
                 if (pos != tmp.npos)
                 {
-                    auto k = tmp.substr(0, pos), v = tmp.substr(pos + (::std::size_t)2);
+                    auto k = tmp.substr(0, pos), v = tmp.substr(pos + 2);
                     headers[k] += v;
                 }
             }
@@ -86,7 +86,7 @@ namespace crq
         static ::std::string gen_host(::std::string url)
         {
             auto pos = url.find("://");
-            if (pos != url.npos) url = url.substr(pos + (::std::size_t)3);
+            if (pos != url.npos) url = url.substr(pos + 3);
 
             pos = url.find("/");
             return pos == url.npos ? url : url.substr(0, pos);
@@ -95,7 +95,7 @@ namespace crq
         static ::std::string gen_req(::std::string url)
         {
             auto pos = url.find("://");
-            if (pos != url.npos) url = url.substr(pos + (::std::size_t)3);
+            if (pos != url.npos) url = url.substr(pos + 3);
 
             pos = url.find('/');
             return pos == url.npos ? "/" : url.substr(pos);
