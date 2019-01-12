@@ -32,12 +32,12 @@ namespace crq
         Response(const ::std::string &data)
         {
             if (data.empty()) return;
-            
+
             ::std::stringstream ss(data);
             ss >> reason; ss >> status_code; ss.get();
             ::std::getline(ss, reason); reason.pop_back();
 
-            auto header_endpos = data.find("\r\n\r\n") + (::std::size_t)4, html_beginpos = data.find("<html>");
+            auto header_endpos = data.find("\r\n\r\n") + 4, html_beginpos = data.find("<html>");
             body = html_beginpos == data.npos ? data.substr(header_endpos) : data.substr(html_beginpos);
 
             ::std::string tmp;
@@ -63,7 +63,7 @@ namespace crq
             reason      = rhs.reason;
             body        = rhs.body;
             headers      = rhs.headers;
-            
+
             return *this;
         }
 
@@ -163,7 +163,7 @@ namespace crq
 
             return request(url, "GET ", hds);
         }
-        
+
     };
 
 }
