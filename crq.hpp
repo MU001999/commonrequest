@@ -111,8 +111,10 @@ namespace crq
             hints.ai_family = AF_INET;
             hints.ai_socktype = SOCK_STREAM;
             hints.ai_protocol = IPPROTO_TCP;
-            getaddrinfo(gen_host(url).c_str(), "80", &hints, &result);
-
+            hints.ai_flags = AI_CANONNAME;
+            if(int err_no = getaddrinfo(gen_host(url).c_str(), "80", &hints, &result)) {
+                cout << "Error message: " << gai_strerror(err_no) << endl;
+            }
 
             // connect to server
             auto socket_fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
