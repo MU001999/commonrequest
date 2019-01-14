@@ -111,6 +111,7 @@ namespace crq
             hints.ai_family = AF_INET;
             hints.ai_socktype = SOCK_STREAM;
             hints.ai_protocol = IPPROTO_TCP;
+            hints.ai_flags = AI_CANONNAME;
             getaddrinfo(gen_host(url).c_str(), "80", &hints, &result);
 
 
