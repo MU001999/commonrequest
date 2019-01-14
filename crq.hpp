@@ -130,8 +130,8 @@ namespace crq
             for (auto &kv : headers) request_msg += kv.first + ": " + kv.second + "\r\n";
             request_msg += "\r\n";
 
-            send(socket_fd, request_msg.c_str(), request_msg.length(), 0);
-
+            if (send(socket_fd, request_msg.c_str(), request_msg.length(), 0) < 0)
+                return Response();
 
             // receive response message from server
             char tmp[4096] = { 0 };
