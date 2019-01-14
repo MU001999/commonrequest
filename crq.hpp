@@ -113,7 +113,7 @@ namespace crq
             hints.ai_protocol = IPPROTO_TCP;
             hints.ai_flags = AI_CANONNAME;
             if(int err_no = getaddrinfo(gen_host(url).c_str(), "80", &hints, &result)) {
-                cout << "Error message: " << gai_strerror(err_no) << endl;
+                ::std::cout << "Error message: " << gai_strerror(err_no) << ::std::endl;
             }
 
             // connect to server
