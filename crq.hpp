@@ -19,13 +19,14 @@ namespace crq
 
     class Response
     {
+    private:
+
+        int           p_status_code = 400;
+        ::std::string p_reason, p_body;
+
+        ::std::unordered_map<::std::string, ::std::string> p_headers;
+
     public:
-
-        int           status_code = 400;
-        ::std::string reason, body;
-
-        ::std::unordered_map<::std::string, ::std::string> headers;
-
 
         Response() {}
 
@@ -34,13 +35,13 @@ namespace crq
             if (data.empty()) return;
 
             ::std::stringstream ss(data);
-            ss >> reason; ss >> status_code; ss.get();
-            ::std::getline(ss, reason); reason.pop_back();
+            ss >> p_reason; ss >> p_status_code; ss.get();
+            ::std::getline(ss, p_reason); p_reason.pop_back();
 
             auto header_endpos = data.find("\r\n\r\n") + 4,
                  html_beginpos = data.find("<html>");
 
-            body = html_beginpos == data.npos
+            p_body = html_beginpos == data.npos
                    ? data.substr(header_endpos)
                    : data.substr(html_beginpos);
 
@@ -53,34 +54,57 @@ namespace crq
                 {
                     auto k = tmp.substr(0, pos),
                          v = tmp.substr(pos + 2);
-                    headers[k] += v;
+                    p_headers[k] += v;
                 }
             }
         }
 
         Response(Response &&res) noexcept = default;
+
         ~Response() = default;
 
 
         Response& operator=(Response &rhs)
         {
-            status_code = rhs.status_code;
-            reason      = rhs.reason;
-            body        = rhs.body;
-            headers     = rhs.headers;
+            p_status_code = rhs.p_status_code;
+            p_reason      = rhs.p_reason;
+            p_body        = rhs.p_body;
+            p_headers     = rhs.p_headers;
 
             return *this;
         }
 
         Response& operator=(Response &&rhs) noexcept
         {
-            ::std::swap(status_code, rhs.status_code);
-            ::std::swap(reason,      rhs.reason);
-            ::std::swap(body,        rhs.body);
-            ::std::swap(headers,     rhs.headers);
+            ::std::swap(p_status_code, rhs.p_status_code);
+            ::std::swap(p_reason,      rhs.p_reason);
+            ::std::swap(p_body,        rhs.p_body);
+            ::std::swap(p_headers,     rhs.p_headers);
 
             return *this;
         }
+
+
+        const int status_code() const
+        {
+            return p_status_code;
+        }
+
+        const ::std::string& reason() const
+        {
+            return p_reason;
+        }
+
+        const ::std::string& body() const
+        {
+            return p_body;
+        }
+
+        const decltype(p_headers)& headers() const
+        {
+            return p_headers;
+        }
+
     };
 
 
