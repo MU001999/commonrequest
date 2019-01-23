@@ -13,9 +13,9 @@ int main(int argc, char *argv[])
     //    {"Cookie", res.headers["Set-Cookie"]},
     //    });
 
-    cout << res.status_code << endl;
-    cout << res.reason << endl;
-    cout << res.body << endl;
+    cout << res.status_code() << endl;
+    cout << res.reason() << endl;
+    cout << res.body() << endl;
 
     return 0;
 }
