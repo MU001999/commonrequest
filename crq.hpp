@@ -37,8 +37,12 @@ namespace crq
             ss >> reason; ss >> status_code; ss.get();
             ::std::getline(ss, reason); reason.pop_back();
 
-            auto header_endpos = data.find("\r\n\r\n") + 4, html_beginpos = data.find("<html>");
-            body = html_beginpos == data.npos ? data.substr(header_endpos) : data.substr(html_beginpos);
+            auto header_endpos = data.find("\r\n\r\n") + 4,
+                 html_beginpos = data.find("<html>");
+
+            body = html_beginpos == data.npos
+                   ? data.substr(header_endpos)
+                   : data.substr(html_beginpos);
 
             ::std::string tmp;
             while (::std::getline(ss, tmp) && tmp != "\r")
@@ -47,7 +51,8 @@ namespace crq
                 auto pos = tmp.find(':');
                 if (pos != tmp.npos)
                 {
-                    auto k = tmp.substr(0, pos), v = tmp.substr(pos + 2);
+                    auto k = tmp.substr(0, pos),
+                         v = tmp.substr(pos + 2);
                     headers[k] += v;
                 }
             }
@@ -62,7 +67,7 @@ namespace crq
             status_code = rhs.status_code;
             reason      = rhs.reason;
             body        = rhs.body;
-            headers      = rhs.headers;
+            headers     = rhs.headers;
 
             return *this;
         }
@@ -72,7 +77,7 @@ namespace crq
             ::std::swap(status_code, rhs.status_code);
             ::std::swap(reason,      rhs.reason);
             ::std::swap(body,        rhs.body);
-            ::std::swap(headers,      rhs.headers);
+            ::std::swap(headers,     rhs.headers);
 
             return *this;
         }
@@ -89,7 +94,9 @@ namespace crq
             if (pos != url.npos) url = url.substr(pos + 3);
 
             pos = url.find("/");
-            return pos == url.npos ? url : url.substr(0, pos);
+            return pos == url.npos
+                   ? url
+                   : url.substr(0, pos);
         }
 
         static ::std::string gen_req(::std::string url)
@@ -98,7 +105,9 @@ namespace crq
             if (pos != url.npos) url = url.substr(pos + 3);
 
             pos = url.find('/');
-            return pos == url.npos ? "/" : url.substr(pos);
+            return pos == url.npos
+                   ? "/"
+                   : url.substr(pos);
         }
 
         static Response request(const ::std::string &url, const ::std::string method, ::std::unordered_map<::std::string, ::std::string> &headers)
@@ -108,10 +117,10 @@ namespace crq
 
             // init server_addr
             addrinfo hints, *result;
-            hints.ai_family = AF_INET;
+            hints.ai_flags    = AI_CANONNAME;
+            hints.ai_family   = AF_INET;
             hints.ai_socktype = SOCK_STREAM;
             hints.ai_protocol = IPPROTO_TCP;
-            hints.ai_flags = AI_CANONNAME;
             getaddrinfo(gen_host(url).c_str(), "80", &hints, &result);
 
 
@@ -128,7 +137,9 @@ namespace crq
 
             // send request message to server
             ::std::string request_msg = method + gen_req(url) + " HTTP/1.1\r\n";
+
             for (auto &kv : headers) request_msg += kv.first + ": " + kv.second + "\r\n";
+
             request_msg += "\r\n";
 
             if (send(socket_fd, request_msg.c_str(), request_msg.length(), 0) < 0)
