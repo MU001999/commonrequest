@@ -202,4 +202,9 @@ namespace crq
 
     };
 
+    inline Response get(const ::std::string &url, ::std::unordered_map<::std::string, ::std::string> headers = {})
+    {
+        return Request::get(url, headers);
+    }
+
 }
