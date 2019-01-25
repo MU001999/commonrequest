@@ -200,11 +200,30 @@ namespace crq
             return request(url, "GET ", hds);
         }
 
+        static Response post(const ::std::string &url, ::std::unordered_map<::std::string, ::std::string> headers = {})
+        {
+            decltype(headers) hds = {
+                {"Host", gen_host(url)},
+                {"Content-type", "text/html"},
+                {"Connection", "Close"},
+                {"Accept-Language", "zh-CN,zh,en-US"},
+                {"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0"},
+            };
+            for (auto &kv : headers) hds[kv.first] = kv.second;
+
+            return request(url, "POST ", hds);
+        }
+
     };
 
     inline Response get(const ::std::string &url, ::std::unordered_map<::std::string, ::std::string> headers = {})
     {
         return Request::get(url, headers);
+    }
+
+    inline Response post(const ::std::string &url, ::std::unordered_map<::std::string, ::std::string> headers = {})
+    {
+        return Request::post(url, headers);
     }
 
 }
