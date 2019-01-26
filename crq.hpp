@@ -160,9 +160,9 @@ namespace crq
 
 
             // send request message to server
-            ::std::string request_msg = method + gen_req(url) + " HTTP/1.1\r\n"s;
+            ::std::string request_msg = method + gen_req(url) + " HTTP/1.1\r\n";
 
-            for (auto &kv : headers) request_msg += kv.first + ": "s + kv.second + "\r\n"s;
+            for (auto &kv : headers) request_msg += kv.first + ": " + kv.second + "\r\n";
 
             request_msg += "\r\n";
 
