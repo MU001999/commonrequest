@@ -2,6 +2,7 @@
 
 
 #include <string>
+#include <vector>
 #include <sstream>
 #include <utility>
 #include <algorithm>
@@ -186,7 +187,10 @@ namespace crq
 
     public:
 
-        static Response get(const ::std::string &url, ::std::unordered_map<::std::string, ::std::string> headers = {})
+        static Response get(
+            const ::std::string &url,
+            const ::std::vector<::std::pair<::std::string, ::std::string>> &params = {},
+            ::std::unordered_map<::std::string, ::std::string> headers = {})
         {
             decltype(headers) hds = {
                 {"Host", gen_host(url)},
@@ -200,7 +204,17 @@ namespace crq
             return request(url, "GET ", hds);
         }
 
-        static Response post(const ::std::string &url, ::std::unordered_map<::std::string, ::std::string> headers = {})
+        static Response get(
+            const ::std::string &url,
+            ::std::unordered_map<::std::string, ::std::string> headers)
+        {
+            return get(url, {}, headers);
+        }
+
+        static Response post(
+            const ::std::string &url,
+            const ::std::vector<::std::pair<::std::string, ::std::string>> &data = {},
+            ::std::unordered_map<::std::string, ::std::string> headers = {})
         {
             decltype(headers) hds = {
                 {"Host", gen_host(url)},
@@ -214,16 +228,44 @@ namespace crq
             return request(url, "POST ", hds);
         }
 
+        static Response post(
+            const ::std::string &url,
+            ::std::unordered_map<::std::string, ::std::string> headers)
+        {
+            return post(url, {}, headers);
+        }
+
     };
 
-    inline Response get(const ::std::string &url, ::std::unordered_map<::std::string, ::std::string> headers = {})
+
+    inline Response get(
+        const ::std::string &url,
+        const ::std::vector<::std::pair<::std::string, ::std::string>> &params = {},
+        ::std::unordered_map<::std::string, ::std::string> headers = {})
     {
-        return Request::get(url, headers);
+        return Request::get(url, params, headers);
     }
 
-    inline Response post(const ::std::string &url, ::std::unordered_map<::std::string, ::std::string> headers = {})
+    inline Response get(
+        const ::std::string &url,
+        ::std::unordered_map<::std::string, ::std::string> headers)
     {
-        return Request::post(url, headers);
+        return Request::get(url, {}, headers);
+    }
+
+    inline Response post(
+        const ::std::string &url,
+        const ::std::vector<::std::pair<::std::string, ::std::string>> &data = {},
+        ::std::unordered_map<::std::string, ::std::string> headers = {})
+    {
+        return Request::post(url, data, headers);
+    }
+
+    inline Response post(
+        const ::std::string &url,
+        ::std::unordered_map<::std::string, ::std::string> headers)
+    {
+        return Request::post(url, {}, headers);
     }
 
 }
