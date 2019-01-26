@@ -135,12 +135,16 @@ namespace crq
                    : url.substr(pos);
         }
 
-        static Response request(const ::std::string &url, const ::std::string &method, const ::std::unordered_map<::std::string, ::std::string> &headers)
+        static Response request(
+            const ::std::string &url,
+            const ::std::string &method,
+            const ::std::unordered_map<::std::string, ::std::string> &headers,
+            const ::std::vector<::std::pair<::std::string, ::std::string>> &data = {})
         {
             ::std::string response_msg;
 
 
-            // init server_addr
+            // init server addrinfo
             addrinfo hints, *result;
             hints.ai_flags    = AI_CANONNAME;
             hints.ai_family   = AF_INET;
@@ -160,15 +164,20 @@ namespace crq
             }
 
 
-            // send request message to server
+            // init request message
             ::std::string request_msg = method + gen_req(url) + " HTTP/1.1\r\n";
 
             for (auto &kv : headers) request_msg += kv.first + ": " + kv.second + "\r\n";
 
             request_msg += "\r\n";
 
+            /* add data to message */
+
+
+            // send request message to server
             if (send(socket_fd, request_msg.c_str(), request_msg.length(), 0) < 0)
                 return Response();
+
 
             // receive response message from server
             char tmp[4096] = { 0 };
@@ -200,6 +209,9 @@ namespace crq
                 {"User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:63.0) Gecko/20100101 Firefox/63.0"},
             };
             for (auto &kv : headers) hds[kv.first] = kv.second;
+
+            ::std::string afterurl;
+            /* add params to url */
 
             return request(url, "GET ", hds);
         }
