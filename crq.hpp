@@ -134,7 +134,7 @@ namespace crq
                    : url.substr(pos);
         }
 
-        static Response request(const ::std::string &url, const ::std::string method, ::std::unordered_map<::std::string, ::std::string> &headers)
+        static Response request(const ::std::string &url, const ::std::string &method, const ::std::unordered_map<::std::string, ::std::string> &headers)
         {
             ::std::string response_msg;
 
@@ -160,9 +160,9 @@ namespace crq
 
 
             // send request message to server
-            ::std::string request_msg = method + gen_req(url) + " HTTP/1.1\r\n";
+            ::std::string request_msg = method + gen_req(url) + " HTTP/1.1\r\n"s;
 
-            for (auto &kv : headers) request_msg += kv.first + ": " + kv.second + "\r\n";
+            for (auto &kv : headers) request_msg += kv.first + ": "s + kv.second + "\r\n"s;
 
             request_msg += "\r\n";
 
