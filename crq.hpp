@@ -139,7 +139,7 @@ namespace crq
             const ::std::string &url,
             const ::std::string &method,
             const ::std::unordered_map<::std::string, ::std::string> &headers,
-            const ::std::vector<::std::pair<::std::string, ::std::string>> &data = {})
+            const ::std::string &payload = "")
         {
             ::std::string response_msg;
 
@@ -169,9 +169,7 @@ namespace crq
 
             for (auto &kv : headers) request_msg += kv.first + ": " + kv.second + "\r\n";
 
-            request_msg += "\r\n";
-
-            /* add data to message */
+            request_msg += "\r\n" + payload;
 
 
             // send request message to server
@@ -211,9 +209,13 @@ namespace crq
             for (auto &kv : headers) hds[kv.first] = kv.second;
 
             ::std::string afterurl;
-            if (!params.empty()) for (auto &kv : params)
+            if (!params.empty())
             {
-                // ...
+                afterurl += '?';
+                for (auto it = params.cbegin(); it != params.cend(); ++it)
+                {
+                    afterurl += (it == params.cbegin() ? "" : "&") + it->first + "=" + it->second;
+                }
             }
 
             return request(url + afterurl, "GET ", hds);
@@ -240,7 +242,13 @@ namespace crq
             };
             for (auto &kv : headers) hds[kv.first] = kv.second;
 
-            return request(url, "POST ", hds, data);
+            ::std::string payload;
+            for (auto it = data.cbegin(); it != data.cend(); ++it)
+            {
+                payload += (it == data.cbegin() ? "" : "&") + it->first + "=" + it->second;
+            }
+
+            return request(url, "POST ", hds, payload);
         }
 
         static Response post(
