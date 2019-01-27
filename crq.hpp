@@ -199,9 +199,9 @@ namespace crq
         static Response get(
             const ::std::string &url,
             const ::std::vector<::std::pair<::std::string, ::std::string>> &params = {},
-            ::std::unordered_map<::std::string, ::std::string> headers = {})
+            const ::std::unordered_map<::std::string, ::std::string> &headers = {})
         {
-            decltype(headers) hds = {
+            ::std::unordered_map<::std::string, ::std::string> hds = {
                 {"Host", gen_host(url)},
                 {"Content-type", "text/html"},
                 {"Connection", "Close"},
@@ -211,14 +211,17 @@ namespace crq
             for (auto &kv : headers) hds[kv.first] = kv.second;
 
             ::std::string afterurl;
-            /* add params to url */
+            if (!params.empty()) for (auto &kv : params)
+            {
+                // ...
+            }
 
-            return request(url, "GET ", hds);
+            return request(url + afterurl, "GET ", hds);
         }
 
         static Response get(
             const ::std::string &url,
-            ::std::unordered_map<::std::string, ::std::string> headers)
+            const ::std::unordered_map<::std::string, ::std::string> &headers)
         {
             return get(url, {}, headers);
         }
@@ -226,9 +229,9 @@ namespace crq
         static Response post(
             const ::std::string &url,
             const ::std::vector<::std::pair<::std::string, ::std::string>> &data = {},
-            ::std::unordered_map<::std::string, ::std::string> headers = {})
+            const ::std::unordered_map<::std::string, ::std::string> &headers = {})
         {
-            decltype(headers) hds = {
+            ::std::unordered_map<::std::string, ::std::string> hds = {
                 {"Host", gen_host(url)},
                 {"Content-type", "text/html"},
                 {"Connection", "Close"},
@@ -237,12 +240,12 @@ namespace crq
             };
             for (auto &kv : headers) hds[kv.first] = kv.second;
 
-            return request(url, "POST ", hds);
+            return request(url, "POST ", hds, data);
         }
 
         static Response post(
             const ::std::string &url,
-            ::std::unordered_map<::std::string, ::std::string> headers)
+            const ::std::unordered_map<::std::string, ::std::string> &headers)
         {
             return post(url, {}, headers);
         }
@@ -253,14 +256,14 @@ namespace crq
     inline Response get(
         const ::std::string &url,
         const ::std::vector<::std::pair<::std::string, ::std::string>> &params = {},
-        ::std::unordered_map<::std::string, ::std::string> headers = {})
+        const ::std::unordered_map<::std::string, ::std::string> &headers = {})
     {
         return Request::get(url, params, headers);
     }
 
     inline Response get(
         const ::std::string &url,
-        ::std::unordered_map<::std::string, ::std::string> headers)
+        const ::std::unordered_map<::std::string, ::std::string> &headers)
     {
         return Request::get(url, {}, headers);
     }
@@ -268,14 +271,14 @@ namespace crq
     inline Response post(
         const ::std::string &url,
         const ::std::vector<::std::pair<::std::string, ::std::string>> &data = {},
-        ::std::unordered_map<::std::string, ::std::string> headers = {})
+        const ::std::unordered_map<::std::string, ::std::string> &headers = {})
     {
         return Request::post(url, data, headers);
     }
 
     inline Response post(
         const ::std::string &url,
-        ::std::unordered_map<::std::string, ::std::string> headers)
+        const ::std::unordered_map<::std::string, ::std::string> &headers)
     {
         return Request::post(url, {}, headers);
     }
