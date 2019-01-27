@@ -23,7 +23,7 @@ namespace crq
     private:
 
         int           p_status_code = 400;
-        ::std::string p_reason, p_body;
+        ::std::string p_raw, p_reason, p_body;
 
         ::std::unordered_map<::std::string, ::std::string> p_headers;
 
@@ -31,7 +31,7 @@ namespace crq
 
         Response() {}
 
-        Response(const ::std::string &data)
+        Response(const ::std::string &data) : p_raw(data)
         {
             if (data.empty()) return;
 
@@ -68,6 +68,7 @@ namespace crq
         Response& operator=(Response &rhs)
         {
             p_status_code = rhs.p_status_code;
+            p_raw         = rhs.p_raw;
             p_reason      = rhs.p_reason;
             p_body        = rhs.p_body;
             p_headers     = rhs.p_headers;
@@ -78,6 +79,7 @@ namespace crq
         Response& operator=(Response &&rhs) noexcept
         {
             ::std::swap(p_status_code, rhs.p_status_code);
+            ::std::swap(p_raw,         rhs.p_raw);
             ::std::swap(p_reason,      rhs.p_reason);
             ::std::swap(p_body,        rhs.p_body);
             ::std::swap(p_headers,     rhs.p_headers);
@@ -89,6 +91,11 @@ namespace crq
         const int status_code() const
         {
             return p_status_code;
+        }
+
+        const ::std::string& raw() const
+        {
+            return p_raw;
         }
 
         const ::std::string& reason() const
