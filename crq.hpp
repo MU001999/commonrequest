@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef COMMONREQUEST_HPP
+#define COMMONREQUEST_HPP
 
 #include <string>
 #include <vector>
@@ -299,3 +299,5 @@ namespace crq
     }
 
 }
+
+#endif // COMMONREQUEST
